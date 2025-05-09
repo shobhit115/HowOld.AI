@@ -11,7 +11,11 @@ st.set_page_config(
     page_icon="👤",
     layout="centered"
 )
-
+st.markdown("""
+    <style>
+    footer {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
 # App title and description
 st.title("Age and Gender Prediction")
 st.write("Upload an image or use your camera to predict age and gender.")
@@ -153,7 +157,7 @@ with tab1:
                 
                 # Display results
                       st.subheader("Prediction Results:")
-                # st.write(f"**Gender:** {pred_gender}")
+                      st.write(f"**Gender:** {pred_gender}")
                       st.write(f"**Age:** {pred_age} years")
                 
                 # Display the processed grayscale image
@@ -189,7 +193,7 @@ with tab2:
                 
                 # Display results
                     st.subheader("Prediction Results:")
-                # st.write(f"**Gender:** {pred_gender}")
+                    st.write(f"**Gender:** {pred_gender}")
                     st.write(f"**Age:** {pred_age} years")
                 
                 # Display the processed grayscale image
