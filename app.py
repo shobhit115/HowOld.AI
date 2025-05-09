@@ -19,6 +19,52 @@ st.write("Upload an image or use your camera to predict age and gender.")
 # Dictionary for gender mapping
 gender_dict = {0: "Female", 1: "Male"}
 
+import cv2
+
+# Load Haar cascade for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+# def detect_and_crop_face(img: Image.Image):
+#     # Convert PIL image to OpenCV format
+#     img_cv = np.array(img.convert('RGB'))
+#     gray = cv2.cvtColor(img_cv, cv2.COLOR_RGB2GRAY)
+    
+#     # Detect faces
+#     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)
+    
+#     if len(faces) == 0:
+#         return None  # No face detected
+    
+#     # Use the first detected face
+#     (x, y, w, h) = faces[0]
+#     face = img.crop((x, y, x + w, y + h))
+#     return face
+def detect_and_crop_face(img: Image.Image, padding: int = 50):
+    # Convert PIL image to OpenCV format
+    img_cv = np.array(img.convert('RGB'))
+    gray = cv2.cvtColor(img_cv, cv2.COLOR_RGB2GRAY)
+    
+    # Detect faces
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+    
+    if len(faces) == 0:
+        return None  # No face detected
+
+    # Use the first detected face
+    (x, y, w, h) = faces[0]
+    
+    # Add padding and keep within image bounds
+    x1 = max(x - padding, 0)
+    y1 = max(y - padding, 0)
+    x2 = min(x + w + padding, img.width)
+    y2 = min(y + h, img.height)
+    
+    # Crop the face with padding
+    face = img.crop((x1, y1, x2, y2))
+    return face
+
+
+
 # Function to preprocess the image
 def preprocess_image(img):
     # Convert to grayscale
@@ -93,15 +139,22 @@ with tab1:
             # Process and predict
             with st.spinner("Processing image..."):
                 # Preprocess the image
-                processed_img = preprocess_image(image)
-                
+                # processed_img = preprocess_image(image)
+                cropped_face = detect_and_crop_face(image, padding=75)
+                if cropped_face is None:
+                     st.warning("No face detected in the image. Please try another image.")
+                else:
+                      processed_img = preprocess_image(cropped_face)
+                      st.image(cropped_face, caption="Croped Image", use_container_width=True)
+                    #   st.image(processed_img, caption="processed Image", use_container_width=True)
+                      pred_gender, pred_age = predict_age_gender(processed_img, model)
                 # Make prediction
-                pred_gender, pred_age = predict_age_gender(processed_img, model)
+                # pred_gender, pred_age = predict_age_gender(processed_img, model)
                 
                 # Display results
-                st.subheader("Prediction Results:")
+                      st.subheader("Prediction Results:")
                 # st.write(f"**Gender:** {pred_gender}")
-                st.write(f"**Age:** {pred_age} years")
+                      st.write(f"**Age:** {pred_age} years")
                 
                 # Display the processed grayscale image
                 # st.image(processed_img.reshape(128, 128), caption="Processed Image (Grayscale)", use_container_width=True)
@@ -121,15 +174,23 @@ with tab2:
             # Process and predict
             with st.spinner("Processing image..."):
                 # Preprocess the image
-                processed_img = preprocess_image(image)
+                # processed_img = preprocess_image(image)
+                cropped_face = detect_and_crop_face(image, padding=25)
+                if cropped_face is None:
+                    st.warning("No face detected in the image. Please try another image.")
+                else:
+                    processed_img = preprocess_image(cropped_face)
+                    st.image(cropped_face, caption="Croped Image", use_container_width=True)
+                    pred_gender, pred_age = predict_age_gender(processed_img, model)
+
                 
                 # Make prediction
-                pred_gender, pred_age = predict_age_gender(processed_img, model)
+                # pred_gender, pred_age = predict_age_gender(processed_img, model)
                 
                 # Display results
-                st.subheader("Prediction Results:")
+                    st.subheader("Prediction Results:")
                 # st.write(f"**Gender:** {pred_gender}")
-                st.write(f"**Age:** {pred_age} years")
+                    st.write(f"**Age:** {pred_age} years")
                 
                 # Display the processed grayscale image
                 # st.image(processed_img.reshape(128, 128), caption="Processed Image (Grayscale)", use_column_width=True)
